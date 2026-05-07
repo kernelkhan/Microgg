@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Forecasting Engine</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Professional Light Theme Colors */
+            --bg-body: #f4f7f9;
+            --bg-panel: #ffffff;
+            --bg-input: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-green: #059669;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Header */
+        header {
+            width: 100%;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .dashboard-container {
+            display: flex;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1400px;
+            padding: 0 2rem;
+            min-height: 600px;
+        }
+
+        /* Left Panel - Configuration */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        select, input {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            margin-top: 1rem;
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.875rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--accent-blue-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Right Panel - Chart & Stats */
+        .main-content {
+            flex: 1;
+            background-color: var(--bg-panel);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 400px; 
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-value.green {
+            color: var(--accent-green);
+        }
+
+        /* Loading Spinner */
+        .loader-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">ForecastAI</div>
+        <div class="header-subtitle">Predictive Sales Analytics Dashboard</div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Configuration Sidebar -->
+        <aside class="sidebar">
+            <h2 class="panel-title">Report Settings</h2>
+            
+            <div class="input-group">
+                <label for="state">Sales Region</label>
+                <select id="state">
+                    <option value="Alabama">Alabama</option>
+                    <option value="Arizona">Arizona</option>
+                    <option value="Arkansas">Arkansas</option>
+                    <option value="California" selected>California</option>
+                    <option value="Colorado">Colorado</option>
+                    <option value="Connecticut">Connecticut</option>
+                    <option value="Florida">Florida</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Illinois">Illinois</option>
+                    <option value="Indiana">Indiana</option>
+                    <option value="Iowa">Iowa</option>
+                    <option value="Kansas">Kansas</option>
+                    <option value="Kentucky">Kentucky</option>
+                    <option value="Louisiana">Louisiana</option>
+                    <option value="Maine">Maine</option>
+                    <option value="Maryland">Maryland</option>
+                    <option value="Massachusetts">Massachusetts</option>
+                    <option value="Michigan">Michigan</option>
+                    <option value="Minnesota">Minnesota</option>
+                    <option value="Mississippi">Mississippi</option>
+                    <option value="Missouri">Missouri</option>
+                    <option value="Nebraska">Nebraska</option>
+                    <option value="Nevada">Nevada</option>
+                    <option value="New Hampshire">New Hampshire</option>
+                    <option value="New Mexico">New Mexico</option>
+                    <option value="New York">New York</option>
+                    <option value="North Carolina">North Carolina</option>
+                    <option value="Ohio">Ohio</option>
+                    <option value="Oklahoma">Oklahoma</option>
+                    <option value="Oregon">Oregon</option>
+                    <option value="Pennsylvania">Pennsylvania</option>
+                    <option value="Rhode Island">Rhode Island</option>
+                    <option value="South Carolina">South Carolina</option>
+                    <option value="South Dakota">South Dakota</option>
+                    <option value="Tennessee">Tennessee</option>
+                    <option value="Texas">Texas</option>
+                    <option value="Utah">Utah</option>
+                    <option value="Vermont">Vermont</option>
+                    <option value="Virginia">Virginia</option>
+                    <option value="Washington">Washington</option>
+                    <option value="West Virginia">West Virginia</option>
+                    <option value="Wisconsin">Wisconsin</option>
+                    <option value="Wyoming">Wyoming</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="steps">Forecast Horizon (Weeks)</label>
+                <input type="number" id="steps" value="8" min="1" max="52">
+            </div>
+
+            <button onclick="fetchForecast()" id="predictBtn">Run Forecast Analysis</button>
+        </aside>
+
+        <!-- Main Chart Area -->
+        <main class="main-content">
+            <h2 class="panel-title">Projected Volume Trajectory</h2>
+            
+            <div class="chart-wrapper">
+                <div class="loader-container" id="loader">
+                    <div class="loader"></div>
+                </div>
+                <canvas id="forecastChart"></canvas>
+            </div>
+            
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-label">Prediction Engine</div>
+                    <div class="stat-value" id="statModel">XGBoost ML</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Projected Volume</div>
+                    <div class="stat-value green" id="statTotal">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Weekly Sales</div>
+                    <div class="stat-value" id="statAvg">$0</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        // Initialize empty chart on load
+        window.onload = () => {
+            renderChart([], [], 'Texas');
+        };
+
+        async function fetchForecast() {
+            const state = document.getElementById('state').value;
+            const steps = document.getElementById('steps').value;
+            const loader = document.getElementById('loader');
+
+            // Show loader overlay
+            loader.style.display = 'flex';
+
+            try {
+                // Call FastAPI backend
+                const response = await fetch(`http://127.0.0.1:8000/forecast/${state}?steps=${steps}`);
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                
+                // Parse Data
+                const labels = data.forecasts.map(f => `Week ${f.step}`);
+                const values = data.forecasts.map(f => f.predicted_sales);
+
+                // Calculate Stats
+                const total = values.reduce((a, b) => a + b, 0);
+                const avg = total / values.length;
+
+                document.getElementById('statTotal').innerText = '$' + total.toLocaleString(undefined, {maximumFractionDigits: 0});
+                document.getElementById('statAvg').innerText = '$' + avg.toLocaleString(undefined, {maximumFractionDigits: 0});
+
+                // Render Chart
+                renderChart(labels, values, state);
+
+            } catch (error) {
+                console.error(error);
+                alert("Failed to connect to API. Please ensure the FastAPI server is running on port 8000.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function renderChart(labels, data, state) {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            // Create professional light gradient
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+            gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${state} Sales Forecast`,
+                        data: data,
+                        borderColor: '#2563eb', // Blue
+                        backgroundColor: gradient,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#2563eb',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3 // Professional smooth curve
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                color: '#64748b',
+                                boxWidth: 12,
+                                usePointStyle: true,
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    weight: 500
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#f8fafc',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            titleFont: {
+                                family: "'Inter', sans-serif",
+                                size: 13
+                            },
+                            bodyFont: {
+                                family: "'Inter', sans-serif",
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: '#e2e8f0',
+                                drawBorder: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                },
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                },
+                                padding: 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#64748b',
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                },
+                                padding: 10
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
